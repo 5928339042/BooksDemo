@@ -50,7 +50,7 @@ namespace BooksDemo.Services
         public BookService(LibraryContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
-            _mapper = mapper;   
+            _mapper = mapper;
         }
 
         public async Task<int> CreateBook(CreateBookRequest model)

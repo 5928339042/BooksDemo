@@ -75,7 +75,7 @@ namespace BooksDemo.Services
             }
 
             return 0;
-            
+
         }
 
         public async Task DeleteAuthor(int id)

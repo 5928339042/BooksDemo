@@ -1,10 +1,12 @@
 ﻿using BooksDemo.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace BooksDemo.Migrations; 
+namespace BooksDemo.Migrations;
 
-public class MigrationHelper {
-    public static async Task ApplyDatabaseMigrationsAsync(IServiceProvider services) {
+public class MigrationHelper
+{
+    public static async Task ApplyDatabaseMigrationsAsync(IServiceProvider services)
+    {
         using var scope = services.CreateScope();
         var loggerFactory = scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
         var logger = loggerFactory.CreateLogger<MigrationHelper>();

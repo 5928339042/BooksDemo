@@ -8,8 +8,7 @@ namespace BooksDemo.Models.Authors
         [Required]
         public string Name { get; set; }
 
-        [Required]
-        public Gender Gender { get; set; }
+        public DateTime? BirthDate { get; set; }
 
         public DateTime Created { get; set; } = DateTime.Now;
     }

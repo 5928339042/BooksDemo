@@ -7,8 +7,7 @@ namespace BooksDemo.Models.Authors
     {
         public string Name { get; set; }
 
-        [EnumDataType(typeof(Gender))]
-        public Gender Gender { get; set; }
+        public DateTime? BirthDate { get; set; }
 
         public DateTime Updated { get; set; } = DateTime.Now;
     }

@@ -21,9 +21,6 @@ namespace BooksDemo.Helpers
                         if (prop == null) return false;
                         if (prop.GetType() == typeof(string) && string.IsNullOrEmpty((string)prop)) return false;
 
-                        // Ignore null gender
-                        if (x.DestinationMember.Name == "Gender" && src.Gender == null) return false;
-
                         return true;
                     }
                   ));

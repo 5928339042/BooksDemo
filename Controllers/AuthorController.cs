@@ -57,7 +57,7 @@ namespace BooksDemo.Controllers
         {
             await _authorService.UpdateAuthor(id, model);
             return Ok(new { message = "Author was successfully updated in database" });
-            
+
         }
 
         // DELETE api/<AuthorController>/5

@@ -38,3 +38,9 @@ docker compose logs
 dotnet ef migrations add {MigrationName}
 ```
 
+### Update the database to the last migration
+
+```
+dotnet ef database update
+```
+
