@@ -9,6 +9,6 @@ namespace BooksDemo.Models.Authors
 
         public DateTime? BirthDate { get; set; }
 
-        public DateTime Updated { get; set; } = DateTime.Now;
+        public DateTime Updated { get; set; } = DateTime.UtcNow;
     }
 }

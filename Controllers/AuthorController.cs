@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using BooksDemo.Entities;
+﻿using BooksDemo.Entities;
 using BooksDemo.Models.Authors;
 using BooksDemo.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -13,12 +12,10 @@ namespace BooksDemo.Controllers
     public class AuthorController : ControllerBase
     {
         private IAuthorService _authorService;
-        private IMapper _mapper;
 
-        public AuthorController(IAuthorService authorService, IMapper mapper)
+        public AuthorController(IAuthorService authorService)
         {
             _authorService = authorService;
-            _mapper = mapper;
         }
 
         // GET: api/<AuthorController>

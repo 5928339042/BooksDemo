@@ -7,6 +7,6 @@
         public string? Publisher { get; set; }
         public long ISBN13 { get; set; }
         public int AuthorId { get; set; }
-        public DateTime Created { get; set; } = DateTime.Now;
+        public DateTime Created { get; set; } = DateTime.UtcNow;
     }
 }
