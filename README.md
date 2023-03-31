@@ -4,12 +4,12 @@
 
 ### Prerequisites
 
-* Rancher Desktop: https://rancherdesktop.io/<br>
-  Container runtime must be set to `dockerd`
 * It's required to have [.NET Core 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) installed locally<br>
 ```
 dotnet --version
 ```
+* Rancher Desktop: https://rancherdesktop.io/<br>
+  Container runtime must be set to `dockerd`
 
   Note: Docker Desktop may be used too if one contains the license for it.
 
