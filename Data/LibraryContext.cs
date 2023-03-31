@@ -12,8 +12,8 @@ namespace BooksDemo.Data
             _configuration = configuration;
         }
 
-        public DbSet<Author> Authors { get; set; }
-        public DbSet<Book> Books { get; set; }
+        public DbSet<Author> Authors { get; set; } = null!;
+        public DbSet<Book> Books { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
