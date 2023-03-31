@@ -4,6 +4,10 @@
 
 ### Prerequisites
 
+* It's required to have [.NET Core 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) installed locally<br>
+```
+dotnet --version
+```
 * Rancher Desktop: https://rancherdesktop.io/<br>
   Container runtime must be set to `dockerd`
 
@@ -28,6 +32,15 @@ docker compose down
 View logs from all containers:
 ```
 docker compose logs
+```
+
+### Setting up
+
+```shell
+git clone https://github.com/5928339042/BooksDemo.git
+cd BooksDemo
+dotnet build
+dotnet run
 ```
 
 ### Add new database migration
