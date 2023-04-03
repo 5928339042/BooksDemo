@@ -39,8 +39,8 @@ public class AuthorController : ControllerBase
     {
         var authorId = await _authorService.CreateAuthor(model);
 
-        return authorId != 0 ? 
-            Ok(new { message = $"Author was successfully created in database with the id {authorId}" }) : 
+        return authorId != 0 ?
+            Ok(new { message = $"Author was successfully created in database with the id {authorId}" }) :
             BadRequest("Something wrong with request");
     }
 

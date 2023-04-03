@@ -38,11 +38,11 @@ public class BooksController : ControllerBase
     public async Task<IActionResult> CreateBook(CreateBookRequest model)
     {
         await _authorService.GetAuthorByIdAsync(model.AuthorId);
-        
+
         var book = await _bookService.CreateBook(model);
 
-        return book != 0 ? 
-            Ok("The book was successfully added to the database") : 
+        return book != 0 ?
+            Ok("The book was successfully added to the database") :
             BadRequest("Something wrong with request");
     }
 
