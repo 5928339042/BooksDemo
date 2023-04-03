@@ -39,7 +39,7 @@ public class BooksController : ControllerBase
     {
         await _authorService.GetAuthorByIdAsync(model.AuthorId);
 
-        var book = await _bookService.CreateBook(model);
+        var book = await _bookService.CreateBookAsync(model);
 
         return book != 0 ?
             Ok("The book was successfully added to the database") :
@@ -51,7 +51,7 @@ public class BooksController : ControllerBase
     public async Task<IActionResult> UpdateBook(int id, UpdateBookRequest model)
     {
         await _authorService.GetAuthorByIdAsync(model.AuthorId);
-        await _bookService.UpdateBook(id, model);
+        await _bookService.UpdateBookAsync(id, model);
         return Ok("The book was successfully updated in the database");
     }
 
@@ -59,7 +59,7 @@ public class BooksController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteBook(int id)
     {
-        await _bookService.DeleteBook(id);
+        await _bookService.DeleteBookAsync(id);
         return Ok("The book was successfully deleted in the database");
     }
 }

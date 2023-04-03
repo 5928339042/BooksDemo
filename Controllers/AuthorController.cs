@@ -37,7 +37,7 @@ public class AuthorController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateAuthor(CreateAuthorRequest model)
     {
-        var authorId = await _authorService.CreateAuthor(model);
+        var authorId = await _authorService.CreateAuthorAsync(model);
 
         return authorId != 0 ?
             Ok(new { message = $"Author was successfully created in database with the id {authorId}" }) :
@@ -48,7 +48,7 @@ public class AuthorController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAuthor(int id, UpdateAuthorRequest model)
     {
-        await _authorService.UpdateAuthor(id, model);
+        await _authorService.UpdateAuthorAsync(id, model);
         return Ok(new { message = "Author was successfully updated in database" });
 
     }
@@ -57,7 +57,7 @@ public class AuthorController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAuthor(int id)
     {
-        await _authorService.DeleteAuthor(id);
+        await _authorService.DeleteAuthorAsync(id);
         return Ok(new { message = "Author was successfully deleted in database" });
 
     }

@@ -28,21 +28,21 @@ public interface IAuthorService
     /// Create a new author in the database
     /// </summary>
     /// <param name="model">Create Author request model</param>
-    Task<int> CreateAuthor(CreateAuthorRequest model);
+    Task<int> CreateAuthorAsync(CreateAuthorRequest model);
 
     /// <summary>
     /// Update an author in the database if the author already exists.
     /// </summary>
     /// <param name="id"></param>
     /// <param name="model"></param>
-    Task UpdateAuthor(int id, UpdateAuthorRequest model);
+    Task UpdateAuthorAsync(int id, UpdateAuthorRequest model);
 
     /// <summary>
     /// Delete a single author in the database. Will delete the author if the author exists in the database.
     /// Cascading is enabled and will delete the authors books from the database at the same time. Use with caution.
     /// </summary>
     /// <param name="id">Id of the author to delete</param>
-    Task DeleteAuthor(int id);
+    Task DeleteAuthorAsync(int id);
 }
 
 public class AuthorService : IAuthorService
@@ -56,7 +56,7 @@ public class AuthorService : IAuthorService
         _mapper = mapper;
     }
 
-    public async Task<int> CreateAuthor(CreateAuthorRequest model)
+    public async Task<int> CreateAuthorAsync(CreateAuthorRequest model)
     {
         // Validate new author
         if (await _dbContext.Authors.AnyAsync(x => x.Name == model.Name))
@@ -72,9 +72,9 @@ public class AuthorService : IAuthorService
         return author?.Id ?? 0;
     }
 
-    public async Task DeleteAuthor(int id)
+    public async Task DeleteAuthorAsync(int id)
     {
-        var author = await _getAuthorById(id);
+        var author = await GetAuthorByIdAsync(id);
 
         _dbContext.Authors.Remove(author); // Delete the author and books (Cascading is enabled)
         await _dbContext.SaveChangesAsync().ConfigureAwait(true);
@@ -96,32 +96,6 @@ public class AuthorService : IAuthorService
     }
 
     public async Task<Author> GetAuthorByIdAsync(int id, bool includeBooks = false)
-    {
-        return await _getAuthorById(id, includeBooks).ConfigureAwait(true);
-    }
-
-    public async Task UpdateAuthor(int id, UpdateAuthorRequest model)
-    {
-        var author = await _getAuthorById(id).ConfigureAwait(true);
-
-        // Validation
-        if (model.Name != author.Name && await _dbContext.Authors.AnyAsync(x => x.Name == model.Name))
-            throw new RepositoryException($"An author with the name {model.Name} already exists.");
-
-        // copy model to author and save
-        _mapper.Map(model, author);
-        _dbContext.Authors.Update(author);
-        await _dbContext.SaveChangesAsync();
-
-    }
-
-    /// <summary>
-    /// Get a single author and the books if requested. Looks in the database for an author and returns null, if the author did not exist.
-    /// </summary>
-    /// <param name="id">Author ID</param>
-    /// <param name="includeBooks">True to include books</param>
-    /// <returns>A single author</returns>
-    private async Task<Author> _getAuthorById(int id, bool includeBooks = false)
     {
         if (includeBooks)
         {
@@ -152,5 +126,20 @@ public class AuthorService : IAuthorService
 
             return author;
         }
+    }
+
+    public async Task UpdateAuthorAsync(int id, UpdateAuthorRequest model)
+    {
+        var author = await GetAuthorByIdAsync(id);
+
+        // Validation
+        if (model.Name != author.Name && await _dbContext.Authors.AnyAsync(x => x.Name == model.Name))
+            throw new RepositoryException($"An author with the name {model.Name} already exists.");
+
+        // copy model to author and save
+        _mapper.Map(model, author);
+        _dbContext.Authors.Update(author);
+        await _dbContext.SaveChangesAsync();
+
     }
 }

@@ -26,20 +26,20 @@ public interface IBookService
     /// Create a new book in the database
     /// </summary>
     /// <param name="model">Create book request model</param>
-    Task<int> CreateBook(CreateBookRequest model);
+    Task<int> CreateBookAsync(CreateBookRequest model);
 
     /// <summary>
     /// Update a book in the database if the book already exists.
     /// </summary>
     /// <param name="id"></param>
     /// <param name="model"></param>
-    Task UpdateBook(int id, UpdateBookRequest model);
+    Task UpdateBookAsync(int id, UpdateBookRequest model);
 
     /// <summary>
     /// Delete a single book in the database. Will delete the book if the book exists in the database.
     /// </summary>
     /// <param name="id">Id of the book to delete</param>
-    Task DeleteBook(int id);
+    Task DeleteBookAsync(int id);
 }
 
 public class BookService : IBookService
@@ -53,7 +53,7 @@ public class BookService : IBookService
         _mapper = mapper;
     }
 
-    public async Task<int> CreateBook(CreateBookRequest model)
+    public async Task<int> CreateBookAsync(CreateBookRequest model)
     {
         // Validate new book
         if (await _dbContext.Books.AnyAsync(x => x.ISBN13 == model.ISBN13))
@@ -69,9 +69,9 @@ public class BookService : IBookService
         return book.Id;
     }
 
-    public async Task DeleteBook(int id)
+    public async Task DeleteBookAsync(int id)
     {
-        var book = await _getBookById(id);
+        var book = await GetBookByIdAsync(id);
 
         _dbContext.Books.Remove(book);
         await _dbContext.SaveChangesAsync().ConfigureAwait(true);
@@ -86,25 +86,6 @@ public class BookService : IBookService
 
     public async Task<Book> GetBookByIdAsync(int id)
     {
-        return await _getBookById(id);
-    }
-
-    public async Task UpdateBook(int id, UpdateBookRequest model)
-    {
-        var book = await _getBookById(id);
-
-        // Validate the book
-        if (model.ISBN13 != book.ISBN13 && await _dbContext.Books.AnyAsync(x => x.ISBN13 == model.ISBN13))
-            throw new RepositoryException($"A book with the ISBN number {model.ISBN13} already exist in the database.");
-
-        // Copy model data to book object and save it in the database
-        _mapper.Map(model, book);
-        _dbContext.Books.Update(book);
-        await _dbContext.SaveChangesAsync().ConfigureAwait(true);
-    }
-
-    private async Task<Book> _getBookById(int id)
-    {
         var book = await _dbContext.Books
             .AsNoTracking()
             .Where(x => x.Id == id)
@@ -116,5 +97,19 @@ public class BookService : IBookService
         }
 
         return book;
+    }
+
+    public async Task UpdateBookAsync(int id, UpdateBookRequest model)
+    {
+        var book = await GetBookByIdAsync(id);
+
+        // Validate the book
+        if (model.ISBN13 != book.ISBN13 && await _dbContext.Books.AnyAsync(x => x.ISBN13 == model.ISBN13))
+            throw new RepositoryException($"A book with the ISBN number {model.ISBN13} already exist in the database.");
+
+        // Copy model data to book object and save it in the database
+        _mapper.Map(model, book);
+        _dbContext.Books.Update(book);
+        await _dbContext.SaveChangesAsync().ConfigureAwait(true);
     }
 }
