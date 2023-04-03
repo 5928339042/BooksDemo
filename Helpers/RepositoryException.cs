@@ -1,14 +1,6 @@
-﻿using System.Globalization;
+﻿namespace BooksDemo.Helpers;
 
-namespace BooksDemo.Helpers
+public class RepositoryException : Exception
 {
-    public class RepositoryException : Exception
-    {
-        public RepositoryException() : base() { }
-
-        public RepositoryException(string message) : base(message) { }
-
-        public RepositoryException(string message, params object[] args)
-            : base(String.Format(CultureInfo.CurrentCulture, message, args)) { }
-    }
+    public RepositoryException(string message) : base(message) { }
 }
