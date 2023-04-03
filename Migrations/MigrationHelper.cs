@@ -15,6 +15,6 @@ public class MigrationHelper
         logger.LogInformation("Applying database migrations...");
         var dbContext = scope.ServiceProvider.GetRequiredService<LibraryContext>();
         await dbContext.Database.MigrateAsync(hostLifetime.ApplicationStopping);
-        logger.LogInformation("Database migrations have been applied.");
+        logger.LogInformation("Database migrations have been applied");
     }
 }

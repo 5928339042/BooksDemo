@@ -3,52 +3,55 @@ using BooksDemo.Entities;
 using BooksDemo.Models.Authors;
 using BooksDemo.Models.Books;
 
-namespace BooksDemo.Helpers
-{
-    public class AutoMapperProfile : Profile
-    {
-        public AutoMapperProfile()
-        {
-            // CreateAuthorRequest => Author
-            CreateMap<CreateAuthorRequest, Author>()
-                .AfterMap((_, author) =>
-                {
-                    SetUtcKind(author);
-                });
+namespace BooksDemo.Helpers;
 
-            // UpdateAuthorRequest => Author
-            CreateMap<UpdateAuthorRequest, Author>()
-                .AfterMap((_, author) =>
+public class AutoMapperProfile : Profile
+{
+    public AutoMapperProfile()
+    {
+        // CreateAuthorRequest => Author
+        CreateMap<CreateAuthorRequest, Author>()
+            .AfterMap((_, author) =>
+            {
+                SetUtcKind(author);
+            });
+
+        // UpdateAuthorRequest => Author
+        CreateMap<UpdateAuthorRequest, Author>()
+            .AfterMap((_, author) =>
+            {
+                SetUtcKind(author);
+            })
+            .ForAllMembers(x => x.Condition(
+                (_, _, prop) =>
                 {
-                    SetUtcKind(author);
-                })
-                .ForAllMembers(x => x.Condition(
-                    (src, dest, prop) =>
+                    switch (prop)
                     {
                         // let's ignore null and empty string properties
-                        if (prop == null) return false;
-                        if (prop.GetType() == typeof(string) && string.IsNullOrEmpty((string)prop)) return false;
-
-                        return true;
+                        case null:
+                        case string arg3 when string.IsNullOrEmpty(arg3):
+                            return false;
+                        default:
+                            return true;
                     }
-                ));
+                }
+            ));
 
-            // CreateBookRequest => Book
-            CreateMap<CreateBookRequest, Book>()
-                .AfterMap((_, book) => book.Created = DateTime.SpecifyKind(book.Created, DateTimeKind.Utc));
+        // CreateBookRequest => Book
+        CreateMap<CreateBookRequest, Book>()
+            .AfterMap((_, book) => book.Created = DateTime.SpecifyKind(book.Created, DateTimeKind.Utc));
 
-            // UpdateBookRequest => Book
-            CreateMap<UpdateBookRequest, Book>()
-                .AfterMap((_, book) => book.Updated = DateTime.SpecifyKind(book.Updated, DateTimeKind.Utc));
-        }
+        // UpdateBookRequest => Book
+        CreateMap<UpdateBookRequest, Book>()
+            .AfterMap((_, book) => book.Updated = DateTime.SpecifyKind(book.Updated, DateTimeKind.Utc));
+    }
 
-        private void SetUtcKind(Author author)
+    private static void SetUtcKind(Author author)
+    {
+        if (author.BirthDate.HasValue)
         {
-            if (author.BirthDate.HasValue)
-            {
-                author.BirthDate = DateTime.SpecifyKind(author.BirthDate.Value, DateTimeKind.Utc);
-            }
-            author.Created = DateTime.SpecifyKind(author.Created, DateTimeKind.Utc);
+            author.BirthDate = DateTime.SpecifyKind(author.BirthDate.Value, DateTimeKind.Utc);
         }
+        author.Created = DateTime.SpecifyKind(author.Created, DateTimeKind.Utc);
     }
 }

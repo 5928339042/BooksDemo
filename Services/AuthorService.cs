@@ -5,161 +5,141 @@ using BooksDemo.Helpers;
 using BooksDemo.Models.Authors;
 using Microsoft.EntityFrameworkCore;
 
-namespace BooksDemo.Services
+namespace BooksDemo.Services;
+
+public interface IAuthorService
 {
-    public interface IAuthorService
+    /// <summary>
+    /// Get all authors in database. Set includeBooks to true if you want to include all books made by the author.
+    /// </summary>
+    /// <param name="includeBooks">Optional parameter to include books</param>
+    /// <returns>All authors in database</returns>
+    Task<IEnumerable<Author>> GetAllAuthorsAsync(bool includeBooks = false);
+
+    /// <summary>
+    /// Get a single author by Id and include books if requested by the includeBooks boolean.
+    /// </summary>
+    /// <param name="id">Id of Author</param>
+    /// <param name="includeBooks">Optional parameter to include books</param>
+    /// <returns>A single author</returns>
+    Task<Author> GetAuthorByIdAsync(int id, bool includeBooks = false);
+
+    /// <summary>
+    /// Create a new author in the database
+    /// </summary>
+    /// <param name="model">Create Author request model</param>
+    Task<int> CreateAuthorAsync(CreateAuthorRequest model);
+
+    /// <summary>
+    /// Update an author in the database if the author already exists.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="model"></param>
+    Task UpdateAuthorAsync(int id, UpdateAuthorRequest model);
+
+    /// <summary>
+    /// Delete a single author in the database. Will delete the author if the author exists in the database.
+    /// Cascading is enabled and will delete the authors books from the database at the same time. Use with caution.
+    /// </summary>
+    /// <param name="id">Id of the author to delete</param>
+    Task DeleteAuthorAsync(int id);
+}
+
+public class AuthorService : IAuthorService
+{
+    private readonly LibraryContext _dbContext;
+    private readonly IMapper _mapper;
+
+    public AuthorService(LibraryContext dbContext, IMapper mapper)
     {
-        /// <summary>
-        /// Get all authors in database. Set includeBooks to true if you want to include all books made by the author.
-        /// </summary>
-        /// <param name="includeBooks">Optional parameter to include books</param>
-        /// <returns>All authors in database</returns>
-        Task<IEnumerable<Author>> GetAllAuthorsAsync(bool includeBooks = false);
-
-        /// <summary>
-        /// Get a single author by Id and include books if requested by the includeBooks boolean.
-        /// </summary>
-        /// <param name="id">Id of Author</param>
-        /// <param name="includeBooks">Optional parameter to include books</param>
-        /// <returns>A single author</returns>
-        Task<Author> GetAuthorByIdAsync(int id, bool includeBooks = false);
-
-        /// <summary>
-        /// Create a new author in the database
-        /// </summary>
-        /// <param name="model">Create Author request model</param>
-        Task<int> CreateAuthor(CreateAuthorRequest model);
-
-        /// <summary>
-        /// Update an author in the database if the author already exists.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="model"></param>
-        Task UpdateAuthor(int id, UpdateAuthorRequest model);
-
-        /// <summary>
-        /// Delete a single author in the dabase. Will delete the author if the author exists in the database.
-        /// Cascading is enabled and will delete the authors books from the database at the same time. Use with caution.
-        /// </summary>
-        /// <param name="id">Id of the author to delete</param>
-        Task DeleteAuthor(int id);
+        _dbContext = dbContext;
+        _mapper = mapper;
     }
 
-    public class AuthorService : IAuthorService
+    public async Task<int> CreateAuthorAsync(CreateAuthorRequest model)
     {
-        private LibraryContext _dbContext;
-        private readonly IMapper _mapper;
+        // Validate new author
+        if (await _dbContext.Authors.AnyAsync(x => x.Name == model.Name))
+            throw new RepositoryException($"An author with the name {model.Name} already exists.");
 
-        public AuthorService(LibraryContext dbContext, IMapper mapper)
+        // Map model to new author object
+        var author = _mapper.Map<Author>(model);
+
+        // Save Author
+        _dbContext.Authors.Add(author);
+        await _dbContext.SaveChangesAsync().ConfigureAwait(true);
+
+        return author?.Id ?? 0;
+    }
+
+    public async Task DeleteAuthorAsync(int id)
+    {
+        var author = await GetAuthorByIdAsync(id);
+
+        _dbContext.Authors.Remove(author); // Delete the author and books (Cascading is enabled)
+        await _dbContext.SaveChangesAsync().ConfigureAwait(true);
+    }
+
+    public async Task<IEnumerable<Author>> GetAllAuthorsAsync(bool includeBooks = false)
+    {
+        if (includeBooks)
         {
-            _dbContext = dbContext;
-            _mapper = mapper;
+            // Get all authors and their books
+            return await _dbContext.Authors
+                .Include(b => b.Books)
+                .ToListAsync().ConfigureAwait(true);
         }
 
-        public async Task<int> CreateAuthor(CreateAuthorRequest model)
+        // Get all authors without including the books
+        return await _dbContext.Authors
+            .ToListAsync().ConfigureAwait(true);
+    }
+
+    public async Task<Author> GetAuthorByIdAsync(int id, bool includeBooks = false)
+    {
+        if (includeBooks)
         {
-            // Validate new author
-            if (await _dbContext.Authors.AnyAsync(x => x.Name == model.Name))
-                throw new RepositoryException($"An author with the name {model.Name} already exists.");
+            var author = await _dbContext.Authors
+                .AsNoTracking()
+                .Where(x => x.Id == id)
+                .Include(b => b.Books)
+                .FirstOrDefaultAsync().ConfigureAwait(true);
 
-            // Map model to new author object
-            Author author = _mapper.Map<Author>(model);
-
-            // Save Author
-            _dbContext.Authors.Add(author);
-            await _dbContext.SaveChangesAsync().ConfigureAwait(true);
-
-            if (author != null)
+            if (author == null)
             {
-                return author.Id; // Author got created
+                throw new KeyNotFoundException("Author not found");
             }
 
-            return 0;
-
+            return author;
         }
-
-        public async Task DeleteAuthor(int id)
+        else
         {
-            Author? author = await _getAuthorById(id);
+            var author = await _dbContext.Authors
+                .AsNoTracking()
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync().ConfigureAwait(true);
 
-            _dbContext.Authors.Remove(author); // Delete the author and books (Cascading is enabled)
-            await _dbContext.SaveChangesAsync().ConfigureAwait(true);
-        }
-
-        public async Task<IEnumerable<Author>> GetAllAuthorsAsync(bool includeBooks = false)
-        {
-            if (includeBooks)
+            if (author == null)
             {
-                // Get all authors and their books
-                return await _dbContext.Authors
-                    .Include(b => b.Books)
-                    .ToListAsync().ConfigureAwait(true);
+                throw new KeyNotFoundException("Author not found");
             }
-            else
-            {
-                // Get all authors without including the books
-                return await _dbContext.Authors
-                    .ToListAsync().ConfigureAwait(true);
-            }
+
+            return author;
         }
+    }
 
-        public async Task<Author> GetAuthorByIdAsync(int id, bool includeBooks = false)
-        {
-            return await _getAuthorById(id, includeBooks).ConfigureAwait(true);
-        }
+    public async Task UpdateAuthorAsync(int id, UpdateAuthorRequest model)
+    {
+        var author = await GetAuthorByIdAsync(id);
 
-        public async Task UpdateAuthor(int id, UpdateAuthorRequest model)
-        {
-            Author? author = await _getAuthorById(id).ConfigureAwait(true);
+        // Validation
+        if (model.Name != author.Name && await _dbContext.Authors.AnyAsync(x => x.Name == model.Name))
+            throw new RepositoryException($"An author with the name {model.Name} already exists.");
 
-            // Validation
-            if (model.Name != author.Name && await _dbContext.Authors.AnyAsync(x => x.Name == model.Name))
-                throw new RepositoryException($"An author with the name {model.Name} already exists.");
+        // copy model to author and save
+        _mapper.Map(model, author);
+        _dbContext.Authors.Update(author);
+        await _dbContext.SaveChangesAsync();
 
-            // copy model to author and save
-            _mapper.Map(model, author);
-            _dbContext.Authors.Update(author);
-            await _dbContext.SaveChangesAsync();
-
-        }
-
-        /// <summary>
-        /// Get a single author and the books if requested. Looks in the database for an author and returns null, if the author did not exist.
-        /// </summary>
-        /// <param name="id">Author ID</param>
-        /// <param name="includeBooks">True to include books</param>
-        /// <returns>A single author</returns>
-        private async Task<Author> _getAuthorById(int id, bool includeBooks = false)
-        {
-            if (includeBooks)
-            {
-                Author? author = await _dbContext.Authors
-                    .AsNoTracking()
-                    .Where(x => x.Id == id)
-                    .Include(b => b.Books)
-                    .FirstOrDefaultAsync().ConfigureAwait(true);
-
-                if (author == null)
-                {
-                    throw new KeyNotFoundException("Author not found");
-                }
-
-                return author;
-            }
-            else
-            {
-                Author? author = await _dbContext.Authors
-                    .AsNoTracking()
-                    .Where(x => x.Id == id)
-                    .FirstOrDefaultAsync().ConfigureAwait(true);
-
-                if (author == null)
-                {
-                    throw new KeyNotFoundException("Author not found");
-                }
-
-                return author;
-            }
-        }
     }
 }
