@@ -8,6 +8,7 @@
 ```
 dotnet --version
 ```
+* Entity Framework Core CLI is required to be installed locally: https://docs.microsoft.com/en-us/ef/core/cli/dotnet
 * Rancher Desktop: https://rancherdesktop.io/<br>
   Container runtime must be set to `dockerd`
 
