@@ -44,9 +44,8 @@ dotnet build
 dotnet run
 ```
 
-
-
 ### Add new database migration
+
 * Update Entity Framework DB context in the code
 * In command shell run this command (with changed {MigrationName} to the actual name):
 ```
