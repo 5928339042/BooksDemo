@@ -8,6 +8,7 @@
 ```
 dotnet --version
 ```
+* To add/update database migrations it's required to have Entity Framework Core CLI https://docs.microsoft.com/en-us/ef/core/cli/dotnet installed locally
 * Rancher Desktop: https://rancherdesktop.io/<br>
   Container runtime must be set to `dockerd`
 
@@ -43,8 +44,9 @@ dotnet build
 dotnet run
 ```
 
-### Add new database migration
 
+
+### Add new database migration
 * Update Entity Framework DB context in the code
 * In command shell run this command (with changed {MigrationName} to the actual name):
 ```
